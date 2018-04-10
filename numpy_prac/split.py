@@ -20,3 +20,5 @@ show("不等分1维度", np.array_split(A, 3, axis=1))
 show("不等分0维度", np.array_split(A, 3, axis=0))
 show("横向等分", np.vsplit(A, 2))
 show("竖向等分", np.hsplit(A, 2))
+
+
