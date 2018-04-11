@@ -33,7 +33,7 @@ df2 = pd.DataFrame({'A': 1.,
 # 2  1.0 2013-01-02  1.0  3   test  foo
 # 3  1.0 2013-01-02  1.0  3  train  foo
 
-k
+
 def show(mark, para=''):
     print("\n********{0}:********".format(mark))
     if not isinstance(para, str):
