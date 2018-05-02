@@ -33,5 +33,5 @@ sess.run(init)    # 执行初始化数据方法
 for step in range(201):
     sess.run(train)    # 开始训练
     if step % 20 == 0:
-        print(step, sess.run(Weights), sess.run(biases))
+        print(step, sess.run(Weights), sess.run(biases), sess.run(loss))
 
