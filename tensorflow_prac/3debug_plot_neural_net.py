@@ -24,7 +24,7 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
     else:
         global temp_Wx
         temp_Wx = copy.copy(Wx_plus_b)
-        outputs = (Wx_plus_b)
+        outputs = activation_function(Wx_plus_b)
         global temp_outputs
         temp_outputs = copy.copy(outputs)
     return outputs
