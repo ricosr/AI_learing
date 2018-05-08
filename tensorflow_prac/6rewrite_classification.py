@@ -41,7 +41,7 @@ train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
 sess = tf.Session()
 merged = tf.summary.merge_all()
 train_writer = tf.summary.FileWriter("./log/train", sess.graph)
-test_writer = tf.summary.FileWriter("./log/test", sess.graph)k
+test_writer = tf.summary.FileWriter("./log/test", sess.graph)
 init = tf.global_variables_initializer()
 
 sess.run(init)

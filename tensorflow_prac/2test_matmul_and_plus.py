@@ -12,6 +12,8 @@ biases = tf.Variable(tf.zeros([1, 3]) + 0.1, dtype=tf.float32)
 Wx_plus_b = tf.matmul(x_data, Weights) + biases   # 每行都加一次
 
 ac = tf.nn.relu(Wx_plus_b)
+initial = tf.constant(0.1, shape=[5])
+
 
 sess = tf.Session()
 init = tf.global_variables_initializer()
@@ -36,3 +38,5 @@ print("*********************")
 a = sess.run(ac)
 print(a)
 
+
+print(sess.run(initial))
