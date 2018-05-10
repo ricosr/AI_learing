@@ -10,6 +10,7 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)    # mnist数据�
 def compute_accuracy(v_xs, v_ys):
     global prediction
     y_pre = sess.run(prediction, feed_dict={xs: v_xs, keep_prob: 1})
+    print(sess.run(tf.argmax(y_pre, 1), feed_dict={xs: v_xs, keep_prob: 1}))
     correct_prediction = tf.equal(tf.argmax(y_pre, 1), tf.argmax(v_ys, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, keep_prob: 1})
@@ -17,7 +18,7 @@ def compute_accuracy(v_xs, v_ys):
 
 
 def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)    # shape表示生成张量的维度, mean是均值, stddev是标准差, truncated_normal产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成
+    initial = tf.truncated_normal(shape, stddev=0.1)    # shape表示生成张量的维度, mean是均值, stddev是标准差, 产生正太分布的值如果与均值的差值大于两倍的标准差，那就重新生成
     # 这个模型中的权重在初始化时应该加入少量的噪声来打破对称性以及避免0梯度。由于我们使用的是ReLU神经元，因此比较好的做法是用一个较小的正数来初始化偏置项，以避免神经元节点输出恒为0的问题
     return tf.Variable(initial)
 
@@ -51,7 +52,7 @@ x_image = tf.reshape(xs, [-1, 28, 28, 1])
 
 ## conv1 layer ##
 W_conv1 = weight_variable([5, 5, 1, 32])
-# 本层我们的卷积核patch的大小是5x5, 因为黑白图片channel是1所以输入是1, 输出是32个featuremap, 也就是有32个卷积核参与卷积
+# 本层我们的卷积核patch的大小是5x5, 因为黑白图片channel是1所以输入是1, 输出是32个featuremap
 # 32就是操作后输出图片的厚度DEPTH, 神经网络是通过增加图片厚度来总结图片特征的, 这里32是随便取的, 你取30也无所谓
 # 由于扫描图片有叠加, 加之权重, 为加权叠加, 所以depth会增加
 b_conv1 = bias_variable([32])
@@ -70,28 +71,41 @@ h_pool2 = max_pool_2x2(h_conv2)    # output size 7x7x64
 W_fc1 = weight_variable([7*7*64, 1024])
 b_fc1 = bias_variable([1024])
 h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])    # [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)    # 1x1024
-h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)    # 1x1024
+h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 
 ## fc2 layer ##
 W_fc2 = weight_variable([1024, 10])
 b_fc2 = bias_variable([10])
-prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)    # 1x10
+prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
 
 # the error between prediction and real data
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction), reduction_indices=[1]))       # loss
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+# cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction), reduction_indices=[1]))       # loss
+# train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 sess = tf.Session()
-init = tf.global_variables_initializer()
+# init = tf.global_variables_initializer()
 
-sess.run(init)
+saver = tf.train.Saver()    # 存储变量对象
+saver.restore(sess, "cnn_var/cnn_vars.ckpt")
 
-for i in range(5000):
-    batch_xs, batch_ys = mnist.train.next_batch(50)
-    sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
-    if i % 500 == 0:
-        print(compute_accuracy(
-            mnist.test.images[:1000], mnist.test.labels[:1000]))
+sess.run(W_conv1)
+sess.run(b_conv1)
+
+sess.run(W_conv2)
+sess.run(b_conv2)
+
+sess.run(W_fc1)
+sess.run(b_fc1)
+
+sess.run(W_fc2)
+sess.run(b_fc2)
+
+
+# batch_xs, batch_ys = mnist.train.next_batch(50)
+print(sess.run(prediction, feed_dict={xs: mnist.test.images[8:9], ys: mnist.test.labels[8:9], keep_prob: 1}))
+print(compute_accuracy(mnist.test.images[8:9], mnist.test.labels[8:9]))
+
+sess.close()
