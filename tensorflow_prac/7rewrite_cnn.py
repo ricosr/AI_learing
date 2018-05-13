@@ -60,7 +60,7 @@ h_pool1 = max_pool_2x2(h_conv1)    # output size 14x14x32
 
 
 ## conv2 layer ##
-W_conv2 = weight_variable([5,5, 32, 64])    # patch 5x5, in size 32, out size 64
+W_conv2 = weight_variable([5, 5, 32, 64])    # patch 5x5, in size 32, out size 64
 b_conv2 = bias_variable([64])
 h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)     # output size 14x14x64
 h_pool2 = max_pool_2x2(h_conv2)    # output size 7x7x64

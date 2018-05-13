@@ -8,11 +8,15 @@ import numpy as np
 x_data = np.linspace(-1, 1, 5)[:, np.newaxis].astype(np.float32)
 Weights = tf.Variable(tf.random_normal([1, 3]), dtype=tf.float32)
 biases = tf.Variable(tf.zeros([1, 3]) + 0.1, dtype=tf.float32)
+# biases = tf.Variable(tf.constant(0.1, shape=[3, ]))
+
 
 Wx_plus_b = tf.matmul(x_data, Weights) + biases   # 每行都加一次
 
 ac = tf.nn.relu(Wx_plus_b)
 initial = tf.constant(0.1, shape=[5])
+
+test_bias = tf.Variable(tf.constant(0.1, shape=[2, ]))
 
 
 sess = tf.Session()
@@ -40,3 +44,6 @@ print(a)
 
 
 print(sess.run(initial))
+
+print(sess.run(test_bias))
+
