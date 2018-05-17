@@ -24,7 +24,7 @@ def get_batch():
     xs = np.arange(BATCH_START, BATCH_START+TIME_STEPS*BATCH_SIZE).reshape((BATCH_SIZE, TIME_STEPS)) / (10*np.pi)
     # (10*np.pi)无所谓就是让数据密度足够大提高准确性和画图好看一点
     # TIME_STEPS*BATCH_SIZE为了reshape时数据个数足够展开
-    seq = np.sin(xs)    # 只是作为训练的初始值，这样对于cos来说容易拟合
+    seq = np.sin(xs)    # 只是作为训练的初始值, 这样对于cos来说容易拟合, 省略了激励函数, 如果不加sin, 搜索 **activate** 处代码可激活
     res = np.cos(xs)
     BATCH_START += TIME_STEPS    # 将x轴坐标每次向后移动20个单位
     # plt.plot(xs[0, :], res[0, :], 'r', xs[0, :], seq[0, :], 'b--')
@@ -71,6 +71,7 @@ class LSTMRNN(object):
          # batch*n_step                             in_size                                     batch*n_step
         # reshape l_in_y ==> (batch, n_steps, cell_size)    # 最后一个维度实际上是训练样本数据乘权值加偏移后的值
         self.l_in_y = tf.reshape(l_in_y, [-1, self.n_steps, self.cell_size], name='2_3D')
+        # self.l_in_y = tf.cos(tf.reshape(l_in_y, [-1, self.n_steps, self.cell_size], name='2_3D'))    # **activate**
 
     def add_cell(self):
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)    # state_is_tuple会保存长时记忆，返回(outputs, final_state)
@@ -88,13 +89,13 @@ class LSTMRNN(object):
             self.pred = tf.matmul(l_out_x, Ws_out) + bs_out
 
     def compute_cost(self):
-        # 定义交叉熵损失函数, TensorFlow提供了sequence_loss_by_example函数来计算一个序列的交叉熵的和。
+        # 定义交叉熵损失函数, TensorFlow提供了sequence_loss_by_example函数来计算一个序列的交叉熵的和,一个序列的......
         losses = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
             [tf.reshape(self.pred, [-1], name='reshape_pred')],     # 预测的结果, 这里将[batch * steps, output_size]二维数组压缩成一维数组
             [tf.reshape(self.ys, [-1], name='reshape_target')],     # 期待的正确答案, 这里将[batch * steps, output_size]二维数组压缩成一维数组
             [tf.ones([self.batch_size * self.n_steps], dtype=tf.float32)],    # 损失的权重, 在这里所有的权重都为1，也就是说不同batch和不同时刻的重要程度是一样的
             average_across_timesteps=True,    # If set, divide the returned cost by the total label weight.
-            softmax_loss_function=self.ms_error,
+            softmax_loss_function=self.ms_error,    # 计算误差的函数
             name='losses'
         )
         with tf.name_scope('average_cost'):

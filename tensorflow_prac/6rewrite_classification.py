@@ -10,7 +10,7 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)    # mnist数据�
 def add_layer(inputs, in_size, out_size, activation_function=None):
     Weights = tf.Variable(tf.random_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([1, out_size]))
-    Wx_b = tf.matmul(inputs, Weights) + biases
+    Wx_b = tf.matmul(inputs, Weights) + biases    # 每个像素特征都被加权求和并加偏移量, 最后求出10组值, 通过训练权值和偏移使正确的那个位置值越来越大, 是一种建模思想
     Wx_b = tf.nn.dropout(Wx_b, keep_prob)    # 防止过拟合的方法, 一直没成功过。。。
     if activation_function:
         return activation_function(Wx_b)
