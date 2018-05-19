@@ -164,8 +164,32 @@ with tf.Session() as sess:
     #     a[0][i].imshow(np.reshape(mnist.test.images[i], (28, 28)))    # 把像素值重新改为28x28的图片
     #     a[1][i].imshow(np.reshape(encode_decode[i], (28, 28)))    # 把训练后的像素值重新改为28x28的图片
     # plt.show()
-    print(sess.run(tf.shape(mnist.test.labels)))
+
+    # import numpy as np
+    # lar = np.linspace(0, 1, 10000, dtype=int)
     encoder_result = sess.run(encoder_op, feed_dict={X: mnist.test.images})
-    plt.scatter(encoder_result[:, 0], encoder_result[:, 1], c=mnist.test.labels)
+    # plt.scatter(encoder_result[:, 0], encoder_result[:, 1], c=lar)
+    plt.scatter(encoder_result[:, 0], encoder_result[:, 1], c=mnist.test.labels)    # 见上一行注释和下几行(第三点), 每个数字生成对应颜色(0-9)
+    # c : color, sequence, or sequence of color, optional, default: 'b'
+    #         The marker color. Possible values:
+
+    #         - A single color format string.
+    #         - A sequence of color specifications of length n.
+    #         - A sequence of n numbers to be mapped to colors using *cmap* and
+    #           *norm*.
+    #         - A 2-D array in which the rows are RGB or RGBA.
+
+    #         Note that *c* should not be a single numeric RGB or RGBA sequence
+    #         because that is indistinguishable from an array of values to be
+    #         colormapped. If you want to specify the same RGB or RGBA value for
+    #         all points, use a 2-D array with a single row.
+
+    # color map 实际上就是一个 三列的矩阵(或者说，shape 为 [N, 3]的 array )
+    # 矩阵中的值 取值范围 为 [0.,1.]
+    # 每一行代表一个颜色 (RGB)
+
+    # Colormapping typically involves two steps: a data array is first mapped onto the range 0-1 using an instance
+    # of Normalize or of a subclass; then this number in the 0-1 range is mapped to a color using an instance of a
+    # subclass of Colormap.
     plt.colorbar()
     plt.show()
