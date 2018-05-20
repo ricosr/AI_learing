@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 
 BATCH_START = 0    # x轴开始坐标
-TIME_STEPS = 20    # cell一个样本一次要学习的次数
+TIME_STEPS = 20    # cell一组样本一次要学习的次数
 BATCH_SIZE = 50    # 一个batch的训练样本数
 INPUT_SIZE = 1     # 单次只能输入一个样本
 OUTPUT_SIZE = 1    # 单次只返回一个结果

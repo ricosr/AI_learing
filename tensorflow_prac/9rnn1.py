@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
 # set random seed for comparing the two result calculations
-tf.set_random_seed(1)    # 图级seed
+tf.set_random_seed(1)    # 图级seed, 不同的sess间使用同一随机random变量产生同时随机相同
 
 # this is data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)

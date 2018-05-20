@@ -20,7 +20,7 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 
 def calculate_accuracy(tx, ty):    # 输入为test数据, 用于测试准确度
     global prediction
-    y_p = sess.run(prediction, feed_dict={xs: tx, keep_prob:1.0})    # 拿到当前网络状态下(当前的权值和偏移)的预测值
+    y_p = sess.run(prediction, feed_dict={xs: tx, keep_prob:1.0})    # 拿到当前网络状态下(当前的权值和偏移)的预测值(输入为测试样本时)
     correct_prediction = tf.equal(tf.argmax(y_p, 1), tf.argmax(ty, 1))    # 对比预测值和test真实值1的位置
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))    # cast将bool值映射成float值
     result = sess.run(accuracy, feed_dict={xs: tx, ys: ty})
