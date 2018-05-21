@@ -11,7 +11,7 @@ biases = tf.Variable(tf.zeros([1, 3]) + 0.1, dtype=tf.float32)
 # biases = tf.Variable(tf.constant(0.1, shape=[3, ]))
 
 
-Wx_plus_b = tf.matmul(x_data, Weights) + biases   # 每行都加一次
+Wx_plus_b = tf.matmul(x_data, Weights) + biases   # 每行都加一次, 每行相同
 
 ac = tf.nn.relu(Wx_plus_b)
 initial = tf.constant(0.1, shape=[5])
