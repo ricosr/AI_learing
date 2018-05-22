@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
+# 收敛：迭代算法求到解之后（数值解），在某个解上面迭代不动了，只会在可能的真实解两边荡秋千，显示出来目标函数值也是一样，这时就认为收敛了。
 
 ACTIVATION = tf.nn.tanh    # 激活函数
 N_LAYERS = 7               # 网络层数
@@ -50,8 +50,9 @@ def built_net(xs, ys, norm):
         # normalize fully connected product
         if norm:
             # Batch Normalize
+            # [1, 30], [1, 30]
             fc_mean, fc_var = tf.nn.moments(   # 计算统计矩, fc_mean是一阶矩即均值，fc_var则是二阶中心矩即方差, axes=[0]表示按列计算(干掉行)
-                Wx_plus_b,
+                Wx_plus_b,    # [2500, 30]
                 axes=[0],    # 想要 normalize 的维度, [0] 代表 batch 维度
                 # 如果是图像数据, 可以传入 [0, 1, 2], 相当于求[batch, height, width] 的均值/方差, 注意不要加入 channel 维度
             )
@@ -60,12 +61,22 @@ def built_net(xs, ys, norm):
             epsilon = 0.001
 
             # apply moving average for mean and var when train on batch
-            ema = tf.train.ExponentialMovingAverage(decay=0.5)
+            ema = tf.train.ExponentialMovingAverage(decay=0.9999)    # 指定decay参数创建实例, 为了使模型趋于收敛, 会选择decay为接近1的数,
+                                                                     # decay越大模型越稳定，因为decay越大，参数更新的速度就越慢，趋于稳定
+            # 意义：如果你是使用 batch 进行每次的更新, 那每个 batch 的 mean/var 都会不同, 所以我们可以使用 moving average
+            #       的方法记录并慢慢改进 mean/var 的值. 然后将修改提升后的 mean/var 放入 tf.nn.batch_normalization()
             def mean_var_with_update():
-                ema_apply_op = ema.apply([fc_mean, fc_var])
+                ema_apply_op = ema.apply([fc_mean, fc_var])    # 对模型变量使用apply方法
+                # apply方法会为每个变量（也可以指定特定变量）创建各自的shadow variable, 即影子变量. 之所以叫影子变量,
+                # 是因为它会全程跟随训练中的模型变量. 影子变量会被初始化为模型变量的值, 然后, 每训练一个step, 就更新一次.
+                # 更新的方式为:shadow_variable = decay * shadow_variable + (1 - decay) * updated_model_variable
                 with tf.control_dependencies([ema_apply_op]):
                     return tf.identity(fc_mean), tf.identity(fc_var)
-            mean, var = mean_var_with_update()
+                # 对于control_dependencies这个管理器，只有当里面的操作是一个op时，才会生效，也就是先执行传入的参数op，
+                # 再执行里面的op。例如而y=x仅仅是tensor的一个简单赋值，不是定义的op，所以在图中不会形成一个节点，
+                # 这样该管理器就失效了。tf.identity是返回一个一模一样新的tensor的op，这会增加一个新节点到gragh中，
+                # 这时control_dependencies就会生效，所以第二种情况的输出符合预期。
+            mean, var = mean_var_with_update()    # both [1, 30]
 
             Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
             # similar with this two steps:
@@ -92,7 +103,7 @@ def built_net(xs, ys, norm):
         shift = tf.Variable(tf.zeros([1]))
         epsilon = 0.001
         # apply moving average for mean and var when train on batch
-        ema = tf.train.ExponentialMovingAverage(decay=0.5)
+        ema = tf.train.ExponentialMovingAverage(decay=0.9999)
         def mean_var_with_update():
             ema_apply_op = ema.apply([fc_mean, fc_var])
             with tf.control_dependencies([ema_apply_op]):
@@ -120,7 +131,7 @@ def built_net(xs, ys, norm):
     # build output layer
     prediction = add_layer(layers_inputs[-1], 30, 1, activation_function=None)
 
-    cost = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # 2500x1
+    cost = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # [2500, 1]
     train_op = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
     return [train_op, cost, layers_inputs]
 
@@ -164,7 +175,7 @@ for i in range(250):
 
     # train on batch
     sess.run([train_op, train_op_norm], feed_dict={xs: x_data[i*10:i*10+10], ys: y_data[i*10:i*10+10]})
-    # print(sess.run(tf.shape(cost), feed_dict={xs: x_data, ys: y_data}))
+    # print(sess.run([mean, var], feed_dict={xs: x_data, ys: y_data}))
     if i % record_step == 0:
         # record cost
         cost_his.append(sess.run(cost, feed_dict={xs: x_data, ys: y_data}))
@@ -172,7 +183,8 @@ for i in range(250):
 
 plt.ioff()
 plt.figure()
+print(len(np.arange(len(cost_his))*record_step))
 plt.plot(np.arange(len(cost_his))*record_step, np.array(cost_his), label='no BN')     # no norm
 plt.plot(np.arange(len(cost_his))*record_step, np.array(cost_his_norm), label='BN')   # norm
-plt.legend()
+# plt.legend()
 plt.show()
