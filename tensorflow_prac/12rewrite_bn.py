@@ -19,18 +19,22 @@ def plot_his(inputs, inputs_norm):
     for j, all_inputs in enumerate([inputs, inputs_norm]):
         for i, input in enumerate(all_inputs):
             plt.subplot(2, len(all_inputs), j*len(all_inputs)+(i+1))
-            plt.cla()
+            # 图表的整个绘图区域被分成2行和len(all_inputs)列, 现在画第j*len(all_inputs)+(i+1)个图
+            plt.cla()    # plt.cla()清除轴, 当前活动轴在当前图中. 它保持其他轴不变
             if i == 0:
                 the_range = (-7, 10)
             else:
                 the_range = (-1, 1)
             plt.hist(input.ravel(), bins=15, range=the_range, color='#FF5733')
-            plt.yticks(())
+            # ravel行优先展开成一维, bins直方图数量, range每个柱状图取值范围(由于第一个图较离散, 所以取值方位较大)
+            # 直方图,
+            plt.yticks(())    # 设置y轴显示坐标为空
             if j == 1:
-                plt.xticks(the_range)
+                plt.xticks(the_range)    # 设置x轴显示的坐标
             else:
-                plt.xticks(())
-            ax = plt.gca()
+                plt.xticks(())    # 设置x轴显示的坐标
+            ax = plt.gca()    # 返回当前axes对象的句柄值
+            # 把右边和上边的边界设置为不可见
             ax.spines['right'].set_color('none')
             ax.spines['top'].set_color('none')
         plt.title("%s normalizing" % ("Without" if j == 0 else "With"))
@@ -62,8 +66,8 @@ def built_net(xs, ys, norm):
 
             # apply moving average for mean and var when train on batch
             ema = tf.train.ExponentialMovingAverage(decay=0.9999)    # 指定decay参数创建实例, 为了使模型趋于收敛, 会选择decay为接近1的数,
-                                                                     # decay越大模型越稳定，因为decay越大，参数更新的速度就越慢，趋于稳定
-            # 意义：如果你是使用 batch 进行每次的更新, 那每个 batch 的 mean/var 都会不同, 所以我们可以使用 moving average
+                                                                     # decay越大模型越稳定, 因为decay越大, 参数更新的速度就越慢，趋于稳定
+            # 意义: 如果你是使用 batch 进行每次的更新, 那每个 batch 的 mean/var 都会不同, 所以我们可以使用 moving average
             #       的方法记录并慢慢改进 mean/var 的值. 然后将修改提升后的 mean/var 放入 tf.nn.batch_normalization()
             def mean_var_with_update():
                 ema_apply_op = ema.apply([fc_mean, fc_var])    # 对模型变量使用apply方法
@@ -72,10 +76,10 @@ def built_net(xs, ys, norm):
                 # 更新的方式为:shadow_variable = decay * shadow_variable + (1 - decay) * updated_model_variable
                 with tf.control_dependencies([ema_apply_op]):
                     return tf.identity(fc_mean), tf.identity(fc_var)
-                # 对于control_dependencies这个管理器，只有当里面的操作是一个op时，才会生效，也就是先执行传入的参数op，
-                # 再执行里面的op。例如而y=x仅仅是tensor的一个简单赋值，不是定义的op，所以在图中不会形成一个节点，
-                # 这样该管理器就失效了。tf.identity是返回一个一模一样新的tensor的op，这会增加一个新节点到gragh中，
-                # 这时control_dependencies就会生效，所以第二种情况的输出符合预期。
+                # 对于control_dependencies这个管理器, 只有当里面的操作是一个op时, 才会生效, 也就是先执行传入的参数op,
+                # 再执行里面的op. 例如而y=x仅仅是tensor的一个简单赋值, 不是定义的op, 所以在图中不会形成一个节点,
+                # 这样该管理器就失效了. tf.identity是返回一个一模一样新的tensor的op, 这会增加一个新节点到gragh中,
+                # 这时control_dependencies就会生效, 所以第二种情况的输出符合预期.
             mean, var = mean_var_with_update()    # both [1, 30]
 
             Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
@@ -186,5 +190,5 @@ plt.figure()
 print(len(np.arange(len(cost_his))*record_step))
 plt.plot(np.arange(len(cost_his))*record_step, np.array(cost_his), label='no BN')     # no norm
 plt.plot(np.arange(len(cost_his))*record_step, np.array(cost_his_norm), label='BN')   # norm
-# plt.legend()
+plt.legend()   # 添加图例label
 plt.show()
