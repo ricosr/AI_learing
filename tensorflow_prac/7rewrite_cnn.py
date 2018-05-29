@@ -35,7 +35,7 @@ def conv2d(x, W):    # Convolutional layer 提取图像
 
 def max_pool_2x2(x):    # polling layer max polling 提取一片区域的最大值
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    # ksize  池化窗口的大小  是一个四位向量  一般为【1, height, width, 1】 因为我们不想在batch和channels上做操作,所以这两个维度上设为1
+    # ksize  池化窗口的大小  是一个四位向量  一般为[1, height, width, 1] 因为我们不想在batch和channels上做操作, 所以这两个维度上设为1
     # 第一个参数为x的shape为[batch, height, width, channels], 第三个参数, 和卷积类似, 窗口在每一个维度上滑动的步长, 所以一般设为[1, stride, stride, 1]
 
 
@@ -49,7 +49,7 @@ x_image = tf.reshape(xs, [-1, 28, 28, 1])
 # print(x_image.shape)  # [n_samples, 28,28,1]
 
 
-## conv1 layer ##
+## conv1 layer ## old1
 W_conv1 = weight_variable([5, 5, 1, 32])
 # 本层我们的卷积核patch的大小是5x5, 因为黑白图片channel是1所以输入是1, 输出是32个featuremap, 也就是有32个卷积核参与卷积
 # 32就是操作后输出图片的厚度DEPTH, 神经网络是通过增加图片厚度来总结图片特征的, 这里32是随便取的, 你取30也无所谓
@@ -57,6 +57,20 @@ W_conv1 = weight_variable([5, 5, 1, 32])
 b_conv1 = bias_variable([32])
 h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)    # output size 28x28x32
 h_pool1 = max_pool_2x2(h_conv1)    # output size 14x14x32
+# new functions:
+# conv1 = tf.layers.conv2d(   # shape (28, 28, 1)
+#     inputs=x_image,
+#     filters=32,
+#     kernel_size=5,
+#     strides=1,
+#     padding='same',
+#     activation=tf.nn.relu
+# )           # -> (28, 28, 32)
+# pool1 = tf.layers.max_pooling2d(
+#     conv1,
+#     pool_size=2,
+#     strides=2,
+# )           # -> (28, 28, 32)
 
 
 ## conv2 layer ##
@@ -66,12 +80,15 @@ h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)     # output size 14x14
 h_pool2 = max_pool_2x2(h_conv2)    # output size 7x7x64
 
 
-## fc1 layer ##
-# 全连接的目的是什么呢？因为传统的网络我们的输出都是分类，也就是几个类别的概率甚至就是一个数--类别号，那么全连接层就是高度提纯的特征了，方便交给最后的分类器或者回归。
+## fc1 layer ## old2
+# 全连接的目的是什么呢？因为传统的网络我们的输出都是分类, 也就是几个类别的概率甚至就是一个数--类别号, 那么全连接层就是高度提纯的特征了, 方便交给最后的分类器或者回归。
 W_fc1 = weight_variable([7*7*64, 1024])
 b_fc1 = bias_variable([1024])
 h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])    # [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)    # 1x1024
+# new functions:
+# h_fc1 = tf.layers.dense(h_pool2_flat, 10, tf.nn.relu)
+
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)    # 1x1024
 
 
@@ -82,11 +99,22 @@ prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)    # 1x10
 
 
 # the error between prediction and real data
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction), reduction_indices=[1]))       # loss
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction), reduction_indices=[1]))       # loss old3
+# new functions:
+# cross_entropy = tf.losses.softmax_cross_entropy(onehot_labels=ys, logits=prediction)           # compute cost
+
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
+# old 4
+# new functions:
+# accuracy = tf.metrics.accuracy(          # return (acc, update_op), and create 2 local variables
+#     labels=tf.argmax(ys, axis=1), predictions=tf.argmax(prediction, axis=1),)[1]    # axis=1 在第二个维度找最大
+
+
 sess = tf.Session()
-init = tf.global_variables_initializer()
+init = tf.global_variables_initializer()    # old 4
+# new functions:
+# init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer()) # the local var is for accuracy_op
 
 sess.run(init)
 
@@ -95,4 +123,6 @@ for i in range(5000):
     sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
     if i % 500 == 0:
         print(compute_accuracy(
-            mnist.test.images[:1000], mnist.test.labels[:1000]))
+            mnist.test.images[:1000], mnist.test.labels[:1000]))    # old4
+        # print(sess.run(accuracy, {xs: mnist.test.images[:1000], ys: mnist.test.labels[:1000]}))
+

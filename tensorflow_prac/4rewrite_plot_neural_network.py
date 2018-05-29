@@ -20,7 +20,9 @@ def add_layer(inputs, input_size, out_size, activation_function=None):
 # 定义样本数据
 x_data = np.linspace(-1, 1, 300, dtype=np.float32)[:, np.newaxis]
 noise = np.random.normal(0, 0.05, x_data.shape)
-y_data = np.square(x_data) - 0.5 + noise
+y_data = np.square(x_data) - 0.5 + noise     # old1
+# new function:
+# y = np.power(x, 2) + noise
 
 
 # define placeholder for x and y
@@ -30,13 +32,19 @@ ys = tf.placeholder(tf.float32, [None, 1])
 
 # 开始定义神经层
 # 隐藏层
-ly1 = add_layer(x_data, 1, 10, tf.nn.relu)    # 300个训练样本, 1个特征, 10个神经元
+ly1 = add_layer(xs, 1, 10, tf.nn.relu)    # 300个训练样本, 1个特征, 10个神经元 old2
 # 输出层
-prediction = add_layer(ly1, 10, 1)    # 隐藏层10个神经元, 1个输出神经元
+prediction = add_layer(ly1, 10, 1)    # 隐藏层10个神经元, 1个输出神经元 old3
+# new function:
+# ly1 = tf.layers.dense(xs, 10, tf.nn.relu)    # hidden layer
+# prediction = tf.layers.dense(ly1, 1)             # output layer
 
 
 # 定义训练方法
-loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # 求方差, reduction_indices=[1]为干掉第二维度
+loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # 求均方误差, reduction_indices=[1]为干掉第二维度 old4
+# new function:
+# loss = tf.losses.mean_squared_error(xy, prediction)   # compute cost
+
 train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)    # 梯度下降法, 学习率为0.1
 
 

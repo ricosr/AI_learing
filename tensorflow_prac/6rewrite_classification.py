@@ -20,7 +20,7 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 
 def calculate_accuracy(tx, ty):    # 输入为test数据, 用于测试准确度
     global prediction
-    y_p = sess.run(prediction, feed_dict={xs: tx, keep_prob:1.0})    # 拿到当前网络状态下(当前的权值和偏移)的预测值(输入为测试样本时)
+    y_p = sess.run(prediction, feed_dict={xs: tx, keep_prob: 1.0})    # 拿到当前网络状态下(当前的权值和偏移)的预测值(输入为测试样本时)
     correct_prediction = tf.equal(tf.argmax(y_p, 1), tf.argmax(ty, 1))    # 对比预测值和test真实值1的位置
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))    # cast将bool值映射成float值
     result = sess.run(accuracy, feed_dict={xs: tx, ys: ty})
@@ -32,8 +32,14 @@ keep_prob = tf.placeholder(tf.float32)    # 保留权重值对拟合结果的影
 xs = tf.placeholder(tf.float32, [None, 784])
 ys = tf.placeholder(tf.float32, [None, 10])
 
-prediction = add_layer(xs, 784, 10, tf.nn.softmax)    # softmax回归模型
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys*tf.log(prediction)))    # 交叉熵用来衡量我们的预测用于描述真相的低效性
+prediction = add_layer(xs, 784, 10, tf.nn.softmax)    # softmax回归模型 old1
+# new function:
+# prediction = tf.layers.dense(xs, 10, tf.nn.softmax)
+
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys*tf.log(prediction)))    # 交叉熵用来衡量我们的预测用于描述真相的低效性 old2
+# new function:
+# cross_entropy = tf.losses.sparse_softmax_cross_entropy(labels=ys, logits=prediction)
+
 tf.summary.scalar("loss", cross_entropy)
 
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
