@@ -104,6 +104,8 @@ class Vgg16:
         conv5_3 = self.conv_layer(conv5_2, "conv5_3")
         pool5 = self.max_pool(conv5_3, 'pool5')
 
+
+        # 开始迁移部分
         # detach original VGG fc layers and
         # reconstruct your own fc layers serve for your own purpose
         self.flatten = tf.reshape(pool5, [-1, 7*7*512])

@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+# 将不同种类数据进行分类
 
 import tensorflow as tf
 import numpy as np

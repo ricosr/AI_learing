@@ -79,7 +79,7 @@ class LSTMRNN(object):
             self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
         self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
 
-    def add_output_layer(self):
+    def add_output_layer(self):   # old1
         # shape = (batch * steps, cell_size)
         l_out_x = tf.reshape(self.cell_outputs, [-1, self.cell_size], name='2_2D')
         Ws_out = self._weight_variable([self.cell_size, self.output_size])
@@ -87,9 +87,11 @@ class LSTMRNN(object):
         # shape = (batch * steps, output_size)
         with tf.name_scope('Wx_plus_b'):
             self.pred = tf.matmul(l_out_x, Ws_out) + bs_out
+        # new functions:
+        # self.pred = tf.layers.dense(l_out_x, self.output_size)
 
-    def compute_cost(self):
-        # 定义交叉熵损失函数, TensorFlow提供了sequence_loss_by_example函数来计算一个序列的交叉熵的和,一个序列的......
+    def compute_cost(self):    # old2
+        # 定义交叉熵损失函数, TensorFlow提供了sequence_loss_by_example函数来计算一个序列的交叉熵的和,一个序列的!!!!!!
         losses = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
             [tf.reshape(self.pred, [-1], name='reshape_pred')],     # 预测的结果, 这里将[batch * steps, output_size]二维数组压缩成一维数组
             [tf.reshape(self.ys, [-1], name='reshape_target')],     # 期待的正确答案, 这里将[batch * steps, output_size]二维数组压缩成一维数组
@@ -102,6 +104,8 @@ class LSTMRNN(object):
             self.cost = tf.div(tf.reduce_sum(losses, name='losses_sum'), self.batch_size, name='average_cost')
             # div是除法, 浮点数除以浮点数得浮点数, 否则为整数
             tf.summary.scalar('cost', self.cost)
+        # new function: 和上面不一样, 是两种方法
+        # self.cost = tf.losses.mean_squared_error(labels=self.ys, predictions=self.pred)  # compute cost
 
     @staticmethod
     def ms_error(labels, logits):

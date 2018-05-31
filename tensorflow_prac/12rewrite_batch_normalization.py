@@ -48,11 +48,15 @@ def plot_his(inputs, inputs_norm):
 def built_net(xs, ys, norm):
     def add_layer(inputs, in_size, out_size, activation_function=None, norm=False):
         # weights and biases (bad initialization for this case)
-        Weights = tf.Variable(tf.random_normal([in_size, out_size], mean=0., stddev=1.))
+        Weights = tf.Variable(tf.random_normal([in_size, out_size], mean=0., stddev=1.))    # old1
         biases = tf.Variable(tf.zeros([1, out_size]) + 0.1)
 
         # fully connected product
         Wx_plus_b = tf.matmul(inputs, Weights) + biases
+        # new function:
+        # w_init = tf.random_normal_initializer(0., .1)  # weights initialization
+        # Wx_plus_b = tf.layers.dense(x, out_size, kernel_initializer=w_init, bias_initializer=0.1)
+
 
         # normalize fully connected product
         if norm:
@@ -85,10 +89,12 @@ def built_net(xs, ys, norm):
                 # 这时control_dependencies就会生效, 所以第二种情况的输出符合预期.
             mean, var = mean_var_with_update()    # both [1, 30]
 
-            Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
+            Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)    # old2
             # similar with this two steps:
             # Wx_plus_b = (Wx_plus_b - fc_mean) / tf.sqrt(fc_var + 0.001)   主要做normalize的步骤
             # Wx_plus_b = Wx_plus_b * scale + shift   扩大(scale)和平移(shift), 可以被训练
+            # new function:    # 完全两种不同的方法, 此处仅作为标记, 详细见github上代码
+            # Wx_plus_b = tf.layers.batch_normalization(x, momentum=0.4, training=True)    # when have BN
 
         # activation
         if activation_function is None:
@@ -138,7 +144,11 @@ def built_net(xs, ys, norm):
     # build output layer
     prediction = add_layer(layers_inputs[-1], 30, 1, activation_function=None)
 
-    cost = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # [2500, 1]
+    cost = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))    # [2500, 1]    old3
+    # new function:
+    # cost = tf.losses.mean_squared_error(ys, prediction)
+
+
     train_op = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
     return [train_op, cost, layers_inputs]
 

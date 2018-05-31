@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+# 将数据编码后解码, 对比前后误差值
 
 import tensorflow as tf
 import numpy as np

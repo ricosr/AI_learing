@@ -114,7 +114,7 @@ train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 sess = tf.Session()
 init = tf.global_variables_initializer()    # old 4
 # new functions:
-# init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer()) # the local var is for accuracy_op
+# init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer()) # the local var is for update_op
 
 sess.run(init)
 
@@ -124,5 +124,6 @@ for i in range(5000):
     if i % 500 == 0:
         print(compute_accuracy(
             mnist.test.images[:1000], mnist.test.labels[:1000]))    # old4
+        # new function:
         # print(sess.run(accuracy, {xs: mnist.test.images[:1000], ys: mnist.test.labels[:1000]}))
 
