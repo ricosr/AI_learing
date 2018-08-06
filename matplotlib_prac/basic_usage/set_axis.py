@@ -18,7 +18,7 @@ new_ticks = np.linspace(-1, 2, 5)    # 设置刻度范围，-1到2设置5个刻�
 plt.xticks(new_ticks)    # 设置x轴刻度
 plt.yticks([-2, -1.8, -1, 1.22, 3], [r"$really\ bad$", r"$bad$", r"$normal$", r"$good$", r"$really\ good$"])    # 设置y轴刻度和刻度名称
 
-ax = plt.gca()    # 获取当前坐标轴信
+ax = plt.gca()    # 获取当前坐标轴信息
 ax.spines["right"].set_color("red")    # 设置边框颜色
 ax.spines["top"].set_color("blue")
 # plt.show()
@@ -26,7 +26,7 @@ ax.spines["top"].set_color("blue")
 ax.xaxis.set_ticks_position("bottom")    # 设置x的刻度位置    paras: top, bottom, both, default, none
 ax.spines["bottom"].set_position(("data", 0))    # 设置x=0的位置,    paras: outward, axes, data ????
 
-ax.yaxis.set_ticks_position("both")    # 设置y的刻度位置
+ax.yaxis.set_ticks_position("left")    # 设置y的刻度位置
 ax.spines["left"].set_position(("data", 0))    # 设置y=0的位置
 
 plt.show()
