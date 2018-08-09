@@ -42,7 +42,7 @@ ax.contourf(X, Y, Z, zdir='z', offset=-2, cmap=plt.get_cmap("rainbow"))    # zdi
                     on this position in plane normal to zdir
         ==========  ================================================
 """
-C = ax.contour(X, Y, Z, zdir='z', offset=-2, colors="black", linewidths=2)    # 颜色选黑色，线条宽度选0.5
+ax.contour(X, Y, Z, zdir='z', offset=-2, colors="black", linewidths=2)    # 颜色选黑色，线条宽度选0.5
 ax.set_zlim(-2, 2)
 
 plt.show()
