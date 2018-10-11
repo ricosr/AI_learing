@@ -181,5 +181,5 @@ def eval():
 
 if __name__ == '__main__':
     # download()
-    # train()
-    eval()
+    train()
+    # eval()
