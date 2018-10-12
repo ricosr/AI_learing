@@ -20,13 +20,17 @@ class CreateImg:
         content_img = self.load_img(self.content_img)
         self.content_shape = (1,) + content_img.shape   # ????????
         vgg16 = reload_vgg16.Vgg16(self.vgg16_dict, "content", self.content_shape)
+        content_img = np.reshape(content_img, self.content_shape)
         self.content_conv3_1 = vgg16.train("content", content_img)
 
     def extract_style(self):
         style_img = self.load_img(self.style_img)
         style_shapes = (1,) + style_img.shape
         vgg16 = reload_vgg16.Vgg16(self.vgg16_dict, "style", style_shapes)
+        style_img = np.reshape(style_img, style_shapes)
         style_layers_tmp = vgg16.train("style", style_img)
+        style_layers_tmp = map((lambda each_layer_style: np.reshape(each_layer_style, (-1, each_layer_style.shape[3]))), style_layers_tmp)
+        style_layers_tmp = map((lambda each_layer_style: np.matmul(each_layer_style.T, each_layer_style) / each_layer_style.size), style_layers_tmp)
         self.style_keys = ["conv1_1", "conv2_1", "conv3_1", "conv4_1", "conv5_1"]
         self.style_layers = dict(zip(self.style_keys, style_layers_tmp))
 
@@ -41,13 +45,16 @@ class CreateImg:
         #     initial = (initial) * initial_content_noise_coeff + (tf.random_normal(shape) * 0.256) * (
         #     1.0 - initial_content_noise_coeff)
         self.new_img = tf.Variable(initial)  # 包装初始化一个图片数据
-        self.vgg16_new = reload_vgg16.Vgg16(self.vgg16_dict, "optimize")
-
+        self.vgg16_new = reload_vgg16.Vgg16(vgg16_npy=self.vgg16_dict, step="optimize", new_img=self.new_img)
         # net = vgg.net_preloaded(vgg_weights, image, pooling)  # 将初始化图片扔到vgg里面
 
     def optimize_diff(self):
+        # print(self.vgg16_new.conv3_1.get_shape())
+        # print(self.content_conv3_1.shape)
         content_loss = tf.nn.l2_loss(self.vgg16_new.conv3_1 - self.content_conv3_1) / self.content_conv3_1.size
+        # print(content_loss.eval())
         style_losses = []
+        # print(self.vgg16_new.layers_ls)
         for i in range(len(self.style_keys)):
             layer = self.vgg16_new.layers_ls[i]
             _, height, width, number = map(lambda i: i.value, layer.get_shape())
@@ -55,6 +62,8 @@ class CreateImg:
             feats = tf.reshape(layer, (-1, number))
             gram = tf.matmul(tf.transpose(feats), feats) / size
             style_gram = self.style_layers[self.style_keys[i]]
+            print(gram.get_shape())
+            print(style_gram.shape)
             style_losses.append(tf.nn.l2_loss(gram - style_gram) / style_gram.size)
         style_loss = reduce(tf.add, style_losses)
         loss = content_loss + style_loss
@@ -65,9 +74,9 @@ class CreateImg:
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             stderr.write('Optimization started...\n')
-            for i in range(1000):
-                train_step.run(dict={self.vgg16_new.tfx: self.new_img})
-                last_step = (i == 1000 - 1)
+            for i in range(200):
+                train_step.run()
+                last_step = (i == 200 - 1)
                 if last_step:
                     this_loss = loss.eval()
                     if this_loss < best_loss:
@@ -86,9 +95,11 @@ class CreateImg:
         #     img = img[:, :, :3]
         return img
 
-    def save_img(self):
-        img = np.clip(self.new_img, 0, 255).astype(np.uint8)
-        Image.fromarray(self.new_img).save(self.output_img, quality=95)
+    def save_img(self, out_path, output_img):
+        img = np.clip(output_img, 0, 255).astype(np.uint8)
+        # img = np.clip(self.new_img, 0, 255).astype(np.uint8)
+        # Image.fromarray(img).save(self.output_img, quality=95)
+        Image.fromarray(img).save(out_path, quality=95)
 
     def load_vgg16(self, vgg16_path):
         try:
@@ -98,10 +109,12 @@ class CreateImg:
 
 def main():
     create_img = CreateImg(content_img="polyu.jpg", style_img="examples/1-content.jpg", vgg16_path="vgg16.npy", output_img="test.jpg")
+    create_img.save_img("test.jpg", np.zeros((500, 500, 3)))
     create_img.extract_content()
     create_img.extract_style()
-    create_img.optimize_diff()
-    create_img.save_img()
+    create_img.init_new_img()
+    new_img = create_img.optimize_diff()
+    create_img.save_img(create_img.output_img, new_img)
 
 
 if __name__ == '__main__':
