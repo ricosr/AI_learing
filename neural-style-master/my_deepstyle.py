@@ -51,7 +51,7 @@ class CreateImg:
     def optimize_diff(self):
         # print(self.vgg16_new.conv3_1.get_shape())
         # print(self.content_conv3_1.shape)
-        content_loss = tf.nn.l2_loss(self.vgg16_new.conv3_1 - self.content_conv3_1) / self.content_conv3_1.size
+        content_loss = 2 * (tf.nn.l2_loss(self.vgg16_new.conv3_1 - self.content_conv3_1) / self.content_conv3_1.size)
         # print(content_loss.eval())
         style_losses = []
         # print(self.vgg16_new.layers_ls)
@@ -62,27 +62,31 @@ class CreateImg:
             feats = tf.reshape(layer, (-1, number))
             gram = tf.matmul(tf.transpose(feats), feats) / size
             style_gram = self.style_layers[self.style_keys[i]]
-            print(gram.get_shape())
-            print(style_gram.shape)
-            style_losses.append(tf.nn.l2_loss(gram - style_gram) / style_gram.size)
+            # print(gram.get_shape())
+            # print(style_gram.shape)
+            style_losses.append(0.2 * 2 * (tf.nn.l2_loss(gram - style_gram) / style_gram.size))
         style_loss = reduce(tf.add, style_losses)
-        loss = content_loss + style_loss
+        loss = 5e2 * content_loss + 5e0 * style_loss
         train_step = tf.train.AdamOptimizer(1e1, 0.9, 0.999, 1e-08).minimize(loss)    # ??????????
 
         best_loss = float('inf')  # 正无穷
         best = None
+        # TODO
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             stderr.write('Optimization started...\n')
-            for i in range(200):
+            times = 500
+            for i in range(times):
+                print("finish {0}%\r".format(int(i/times*100)), end='')
                 train_step.run()
-                last_step = (i == 200 - 1)
+                last_step = (i == times - 1)
                 if last_step:
                     this_loss = loss.eval()
                     if this_loss < best_loss:
                         best_loss = this_loss
                         best = self.new_img.eval()
                     img_out = best.reshape(self.content_shape[1:])
+                    print("finish 100%\r")
                     return img_out
 
     def load_img(self, path):
@@ -108,8 +112,9 @@ class CreateImg:
             print('Please download VGG16 parameters at here https://mega.nz/#!YU1FWJrA!O1ywiCS2IiOlUCtCpI6HTJOMrneN-Qdv3ywQP5poecM')
 
 def main():
-    create_img = CreateImg(content_img="polyu.jpg", style_img="examples/1-content.jpg", vgg16_path="vgg16.npy", output_img="test.jpg")
-    create_img.save_img("test.jpg", np.zeros((500, 500, 3)))
+    output_img_path = "upload2.jpg"
+    create_img = CreateImg(content_img="upload.jpg", style_img="examples/1-style.jpg", vgg16_path="vgg16.npy", output_img=output_img_path)
+    create_img.save_img(output_img_path, np.zeros((500, 500, 3)))
     create_img.extract_content()
     create_img.extract_style()
     create_img.init_new_img()
