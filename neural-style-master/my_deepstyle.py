@@ -82,7 +82,9 @@ class CreateImg:
 
 def main():
     output_img_path = "test.jpg"
-    create_img = CreateImg(content_img="polyu.jpg", style_img="examples/1-style.jpg", vgg16_path="vgg16.npy", output_img=output_img_path)
+    content_image = "polyu.jpg"
+    style_image = "examples/1-style.jpg"
+    create_img = CreateImg(content_img=content_image, style_img=style_image, vgg16_path="vgg16.npy", output_img=output_img_path)
     create_img.save_img(output_img_path, np.zeros((500, 500, 3)))
     create_img.extract_content()
     create_img.extract_style()
