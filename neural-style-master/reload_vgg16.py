@@ -1,21 +1,18 @@
 # -*- encoding:utf-8 -*-
 
 import tensorflow as tf
-import numpy as np
 
 
 class Vgg16:
     vgg_mean = [103.939, 116.779, 123.68]
 
     def __init__(self, vgg16_npy=None, step=None, shape=None, new_img=None):
-        # pre-trained parameters
         self.data_dict = vgg16_npy
         if step == "optimize":
             self.tfx = new_img
         else:
             self.tfx = tf.placeholder(tf.float32, shape=shape)
 
-        # Convert RGB to BGR
         red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=self.tfx * 255.0)
         bgr = tf.concat(axis=3, values=[
             blue - self.vgg_mean[0],
@@ -23,7 +20,6 @@ class Vgg16:
             red - self.vgg_mean[2],
         ])
 
-        # pre-trained VGG layers are fixed in fine-tune
         self.conv1_1 = self.conv_layer(bgr, "conv1_1")
         conv1_2 = self.conv_layer(self.conv1_1, "conv1_2")
         pool1 = self.max_pool(conv1_2, 'pool1')
@@ -52,7 +48,7 @@ class Vgg16:
             self.layers_ls.append(self.conv5_1)
 
     def conv_layer(self, bottom, name):
-        with tf.variable_scope(name):   # CNN's filter is constant, NOT Variable that can be trained
+        with tf.variable_scope(name):
             conv = tf.nn.conv2d(bottom, self.data_dict[name][0], [1, 1, 1, 1], padding='SAME')
             lout = tf.nn.relu(tf.nn.bias_add(conv, self.data_dict[name][1]))
             return lout
@@ -67,11 +63,4 @@ class Vgg16:
             result = self.sess.run(self.conv3_1, {self.tfx: input_x})
         if step == "style":
             result = self.sess.run([self.conv1_1, self.conv2_1, self.conv3_1, self.conv4_1, self.conv5_1], {self.tfx: input_x})
-        # if step == "optimize":
-        #     self.layers_ls = []
-        #     self.layers_ls.append(self.conv1_1)
-        #     self.layers_ls.append(self.conv2_1)
-        #     self.layers_ls.append(self.conv3_1)
-        #     self.layers_ls.append(self.conv4_1)
-        #     self.layers_ls.append(self.conv5_1)
         return result
