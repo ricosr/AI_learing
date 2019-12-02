@@ -1,0 +1,183 @@
+body { 
+    background-color: rgb(255, 255, 255); 
+}
+
+a {
+    color: #990000;
+}
+a:visited {
+    color: #CC0000;
+}
+
+a.anchor {
+    font-weight: bold;
+    color: #000000;
+}
+
+h2 {
+    padding: 5px;
+    margin-top: 40px;
+    background-color: #990000;
+    color: #FFFFFF;    
+    font-variant: small-caps;
+}
+
+h2 a {
+    color: #FFFFFF;
+}
+
+li, p {line-height: 20px;}
+
+h1, h2 {
+    padding: 5px 5px;
+}
+
+h3, h4, p {
+    padding: 2px 5px;
+}
+
+li { 
+    padding: 3px 0px;
+}
+
+li ol li {
+    list-style: lower-roman;
+}
+
+/**************************************************/
+/********************* NAVBAR *********************/
+
+div.navbar {
+    margin: 40px auto;    
+}
+
+div.navbar ul {
+    text-align: center;    
+}
+
+div.navbar li {
+    list-style: none;
+    display: inline;
+    padding: 20px;
+    font-size: 120%;
+}
+
+		
+/**************************************************/
+/********************* HEADER *********************/
+		
+#header { border: 7px solid #990000;}
+#header img {float: left; }
+#coursetitle { float: left; font-size:160%; padding-left: 20px;}
+#coursetitle span { display: block;}
+		
+.clearfloat {
+    clear:both;
+    height:0;
+    font-size: 1px;
+    line-height: 0px;
+}
+
+
+/**************************************************/
+/********************** INFO **********************/
+
+table.courseinfo {
+    border-collapse:collapse;
+    border-top: 2px solid #CCCCCC;
+    border-bottom: 2px solid #CCCCCC;
+    margin: 10px auto;
+    width: 100%;
+}
+
+table.courseinfo th {
+    text-align: left;
+    padding-right: 20px;
+}
+
+table.courseinfo th, table.courseinfo td {
+    padding: 8px;
+}
+
+table.courseinfo tr.oddRow {background-color:#E1EBFF }
+table.courseinfo tr.evenRow {background-color: #F0F5FF }
+
+/**************************************************/
+/******************** SCHEDULE ********************/
+
+table.schedule {
+    border-collapse:collapse;
+    border-top: 2px solid black; 
+}
+
+table.schedule th {
+    color: #FFFFFF;
+}
+
+table.schedule td, table.schedule th {
+    border: 1px solid #990000;
+    padding: 5px;
+}
+
+table.schedule tr.header th {
+    color: #000000;
+    border-bottom: 2px solid black; 
+    background-color: #E1EBFF; 
+    padding: 15px 10px; 
+    text-align:center;    
+}
+
+table.schedule tr.oddRow {background-color:#FFFFFF }
+table.schedule tr.evenRow {background-color: #FFFFFF }
+
+.slides {
+	color: #0066FF;
+}
+
+.slides:before {
+	content:"Class materials: "; 
+	font-weight: bold;	
+}
+
+.week_num { 
+    font-weight: bold; 
+    vertical-align: middle; 
+    text-align: center; 
+}
+.date { 
+    font-weight: bold; 
+}
+.hw { 
+    font-size: 100%; 
+}
+.who { 
+    font-size: 100%; 
+}
+.lec_title { 
+    font-weight: bold; color: #990000; 
+}
+.reading {
+    font-size: 100%;
+}
+.part { 
+    background: #E1EBFF; 
+    color: #000000; 
+    font-size: 110%; 
+    font-weight: bold; 
+    padding: 15px 10px; 
+}
+
+.optional {
+    display: block;
+    font-variant: small-caps;
+}
+
+.tbd {
+    color: Green;
+}
+
+
+
+
+
+
