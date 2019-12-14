@@ -82,7 +82,7 @@
    - 人类：安全方面最薄弱的环节
 
 ## 攻击类别
-- probe
+- 嗅探
    - 信息收集 (1:1, 1:m, m:1, m:n modes) 
    - IP扫描，端口扫描，Nmap(一种linux系统网络扫描攻击)
 -  Denial of Service (Dos)
