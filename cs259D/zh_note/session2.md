@@ -146,4 +146,20 @@
    - 识别受害者(例如，rjhgbrwh.domain.com) 
    - 跟踪成功
 
-## 
+## 域生成算法
+- 每天创建一个FQDN(全限定域名)的动态列表
+   - 加密的域名
+- 肉机轮询产生FQDN去发现C&C
+- 例子：蠕虫Conficker.C
+   - 每天产生50000个
+   - 尝试连接500次  ？？？
+   - 如果操作员每天只注册一个域，每天有1%的机会更新
+   - 防止更新需要每天注册5万个新域名
+- 好处
+   - 批量生成的域名，使用寿命短(通常为1天)
+   - 很难调查/阻止所有可能的域名
+
+## 盲目代理重定向
+- 增加额外的弹性层
+   - 解释: blind proxy redirection. Redirection disrupts attempts to track down and mitigate fast-flux service network nodes. What happens is the large pool of rotating IP addresses are not the final destination of the request for the content (or other network service). Instead, compromised front end systems are merely deployed as redirectors that funnel requests and data to and from other backend servers, which actually serve the content. Essentially the domain names and URLs for advertised content no longer resolve to the IP address of a specific server, but instead fluctuate amongst many front end redirectors or proxies, which then in turn forward content to another group of backend servers. While this technique has been used for some time in the world of legitimate webserver operations, for the purpose of maintaining high availability and spreading load, in this case it is evidence of the technological evolution of criminal computer networks.
+- 代理IP/域查找和C&C流量
