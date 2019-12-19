@@ -192,7 +192,6 @@
    - 聚类相似的网络流量
       - 谁与谁通信
       - C-plane (C&C通信流量)
-         - C-Plane是负责处理控制信号的，也就是管理呼叫连接的
    - 聚集类似的恶意通讯
       - 谁在做什么
       -  A-plane (Activity traffic) ？？？
@@ -206,3 +205,47 @@
 
 ## BotMiner架构
 ![2-5](./img/2-5.jpg)
+
+## BotMiner: 流量监听器
+- C-plane: 捕获网络流量
+   - 谁与谁通信
+   - 每一条记录包括如下信息
+      - 时间，持续时间，原IP&端口，目的IP&端口，每个方向上传输的数据包数目&字节数
+- A-plane:
+   - 谁在做什么
+   - 分析出站流量
+   - 侦测几种类型的恶意活动
+      - 扫描
+      - 垃圾邮件
+      - 二进制文件下载
+      - 开拓的尝试？？？
+- 依靠Snort(一种开源网络入侵检测/防御系统)，和一些修改
+
+## C-plane聚类
+![2-6](./img/2-6.jpg)
+
+## BotMiner: C-plane clustering
+- 查找具有类似通信模式的机器
+- 步骤：
+   - 前两个步骤并不重要，但有助于提高效率
+      - 过滤掉无关的流量，过滤掉未完全建立的流，过滤出具有已知目的地的流
+   - 第三步：给出一个周期间隔，聚合通信的流（C-flow）
+      - C-flow = {Fi} where Fi have same protocol (TCP/ UDP), source IP, destination IP & port 
+
+## C-flow 特征提取
+- 对于每个C-flow
+   - 时间的
+      - 每小时的流量(fph)
+      - 每秒字节数(bps)
+   - 空间的
+      - 每个流的数据包数(ppf)
+      - 每个数据包的字节数(bpp)
+
+## C-plane聚类
+- 使用kmeans的变体，分两步执行
+   - 整个数据集上的粗粒度集群
+   - 使用所有特性在多个更小的集群上进行细粒度集群
+- 减少特征集：
+   - 每个特征的平均值，标准差
+- 所有的特征集合：
+   - 13 bins per feature to approximate their distribution ？？？每个特征取13个flow数据吗？？？
