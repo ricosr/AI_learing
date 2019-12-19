@@ -163,3 +163,46 @@
 - 增加额外的弹性层
    - 解释: blind proxy redirection. Redirection disrupts attempts to track down and mitigate fast-flux service network nodes. What happens is the large pool of rotating IP addresses are not the final destination of the request for the content (or other network service). Instead, compromised front end systems are merely deployed as redirectors that funnel requests and data to and from other backend servers, which actually serve the content. Essentially the domain names and URLs for advertised content no longer resolve to the IP address of a specific server, but instead fluctuate amongst many front end redirectors or proxies, which then in turn forward content to another group of backend servers. While this technique has been used for some time in the world of legitimate webserver operations, for the purpose of maintaining high availability and spreading load, in this case it is evidence of the technological evolution of criminal computer networks.
 - 代理IP/域查找和C&C流量
+
+## 僵尸网络侦测：挑战
+- 僵尸流量和正常流量相似
+   - 也可能加密
+- 僵尸网络扩展迅速
+  - 新的肉机不断加入
+  - 改变协议
+  - 改变架构
+  - 改变传染模式
+  - Fast flux hosting ？？？
+
+## 僵尸网络侦测：BotMiner (2008)
+- 僵尸网络的本质属性：
+   - 肉机和C&C服务器/节点通信
+      - 集中，分散等
+   - 肉机做恶意活动
+      - 基于IRC协议的僵尸网络
+         - 53%的僵尸网络活动与扫描有关
+            - 为了DDoS攻击或扩展网络
+         - 14.2％与二进制文件下载有关
+      - 基于HTTP/P2P的僵尸网络
+         - 主要用于发送垃圾邮件
+   - 肉机的行为方式类似/相关
+      - 否则，只是一组无关的/孤立的传染
+      - 肉机是无人操纵的，被编程去执行C&C的逻辑或通讯
+- 侦测方法：
+   - 聚类相似的网络流量
+      - 谁与谁通信
+      - C-plane (C&C通信流量)
+         - C-Plane是负责处理控制信号的，也就是管理呼叫连接的
+   - 聚集类似的恶意通讯
+      - 谁在做什么
+      -  A-plane (Activity traffic) ？？？
+   - 计算跨集群的相关性
+      - 找到一个协调的组模式   ？？？
+   - 假定没有先验知识，包括：
+      - 僵尸网络的协议
+      - 捕获的僵尸程序二进制文件(僵尸网络签名)
+      - C&C服务器的名称和地址
+      - C&C通信的内容
+
+## BotMiner架构
+![2-5](./img/2-5.jpg)
