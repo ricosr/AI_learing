@@ -224,7 +224,7 @@
 ## C-plane聚类
 ![2-6](./img/2-6.jpg)
 
-## BotMiner: C-plane clustering
+## BotMiner: C-plane聚类
 - 查找具有类似通信模式的机器
 - 步骤：
    - 前两个步骤并不重要，但有助于提高效率
@@ -248,4 +248,67 @@
 - 减少特征集：
    - 每个特征的平均值，标准差
 - 所有的特征集合：
-   - 13 bins per feature to approximate their distribution ？？？每个特征取13个flow数据吗？？？
+   -  每个特征分成13个区间，以近似估计他们的分布（q5%, q10%, q15%, q20%, q25%, q30%, q40%, q50%, q60%, q70%, q80%, q90%）
+![2-7](./img/2-7.jpg)
+
+## A-plane Clustering
+- 扫描活动特征
+   - 扫描端口
+   - 目标子网
+- 垃圾邮件活动特性
+   - SMTP连接目的
+- 二进制下载
+   - 第一个/随机的部分/整包二进制文件下载
+![2-8](./img/2-8.jpg)
+
+## BotMiner: 结果
+![2-9](./img/2-9.jpg)
+
+## BotMiner: 局限性
+- 规避C-plane监控/聚类
+   - 随机化每个成员自己的通信模式
+      - 例子：随机每个流中的数据包个数，每个包的字节数
+- 规避A-plane的监控/聚类
+   - 隐形的恶意活动
+      - 缓慢的扫描
+- 规避交叉面分析
+   - 延迟恶意活动（提前几天下达指令）
+- 离线系统
+   - 长时间的数据收集
+
+## 僵尸网络侦测：BotFinder(2012)
+- 目标
+   - 侦测单个机器的感染
+   - 只以来网络流
+      - 对加密或混淆有弹性
+      - 不需要深包检测（DPI（Deep Packet Inspection）是一种基于数据包的深度检测技术，针对不同的网络应用层载荷（例如HTTP、DNS等）进行深度检测，通过对报文的有效载荷检测决定其合法性。）
+   - 侦测鬼鬼祟祟的机器窃取数据，但不是垃圾邮件
+- 观察
+   - C&C连接遵循常规模式
+   - 运行肉机的二进制文件在受控环境中，以学习模式 ？？？
+   - 肉机向C&C发送类似的流量
+   - 以类似的方式上传信息到C&C
+   - 与C＆C通信的时序模式
+
+## BotFinder: 系统
+![2-10](./img/2-10.jpg)
+
+## BotFinder: 特征
+- 跟踪中两个随后的流的开始时间之间的平均时间
+- 连接的平均持续时间
+- 平均传输到源的字节数
+- 平均传输到目标的字节数
+- 在流开始时间进行傅立叶变换 ？？？
+
+## BotFinder: 模型创建和匹配
+- 将每个特征单独聚类
+   - 恶意软件功能不相关
+- 匹配:将跟踪的每个特征与相应模型的簇匹配
+
+## BotFinder: 结果
+![2-11](./img/2-11.jpg)
+
+## 参考
+- Botnet Communication Topologies  (https://www.damballa.com/downloads/r_pubs/WP_Botnet_Communications_Primer.pdf) 
+- BotMiner: Clustering Analysis of Network Traffic for Protocol- and StructureIndependent Botnet Detection 
+- BotFinder: Finding Bots in Network Traffic Without Deep Packet Inspection
